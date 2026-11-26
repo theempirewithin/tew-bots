@@ -1,0 +1,21 @@
+# Rebuilds theempirewithin.dev when this README changes, so the project page there shows the new text.
+# Runs only for pushes to main that touch README.md. The Cloudflare deploy hook URL is the
+# repository secret WEBSITE_DEPLOY_HOOK (never put the URL itself in this file).
+name: Update website README
+
+on:
+  push:
+    branches: [main]
+    paths: [README.md]
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the website build
+        env:
+          HOOK: ${{ secrets.WEBSITE_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "::error::Secret WEBSITE_DEPLOY_HOOK is not set"; exit 1; fi
+          curl -fsS -X POST "$HOOK"
